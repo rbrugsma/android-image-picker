@@ -13,6 +13,8 @@ public interface ImagePickerInteractionListener {
     // removes Images whose files no longer exist.
     void finishPickImages(Intent result);
 
+    void requestExternalCameraImage(Intent result);
+
     /**
      * Called when the user selects or deselects sn image. Also called in onCreateView.
      * May include Images whose files no longer exist.

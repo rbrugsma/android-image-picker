@@ -13,7 +13,7 @@ class Image(
         val id: Long,
         val name: String,
         val path: String,
-        val lastChangedTimestamp: Long
+        override val lastChangedTimestamp: Long
 ) : ImagePickerAdapter.Companion.PickerItem(lastChangedTimestamp)  {
 
     @IgnoredOnParcel

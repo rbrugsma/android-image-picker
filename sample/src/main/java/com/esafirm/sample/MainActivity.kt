@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Environment
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.rickb.imagepicker.features.*
 import com.rickb.imagepicker.features.imageloader.DefaultImageLoader
@@ -66,6 +67,7 @@ class MainActivity : AppCompatActivity() {
                     .showSelectionLimitBottomView(true)
                     .totalSizeLimit(3.0)
                     .amountOfMBsAlreadyInUse(1.0)
+                    .showCamera(true)
                     .returnMode(if (returnAfterCapture) ReturnMode.ALL else ReturnMode.NONE) // set whether pick action or camera action should return immediate result or not. Only works in single mode for image picker
                     .folderMode(folderMode) // set folder mode (false by default)
                     .includeVideo(includeVideo) // include video (false by default)
@@ -102,11 +104,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (ImagePicker.shouldHandle(requestCode, resultCode, data)) {
+        if (ImagePicker.isImagesResult(requestCode, resultCode, data)) {
             images.clear()
             images.addAll(ImagePicker.getImages(data))
             printImages(images)
             return
+        } else if (ImagePicker.isExternalCameraRequest(requestCode, resultCode, data)) {
+            // Camera image requested.
+            Log.d(this.javaClass.simpleName, "onActivityResult: ")
         }
         super.onActivityResult(requestCode, resultCode, data)
     }

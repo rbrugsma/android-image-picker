@@ -185,6 +185,15 @@ public class ImagePickerActivity extends AppCompatActivity implements ImagePicke
         finish();
     }
 
+    @Override
+    public void requestExternalCameraImage(Intent data) {
+//        Intent data = new Intent();
+        data.putExtra(IpCons.EXTRA_REQUEST_EXTERNAL_CAMERA, true);
+
+        setResult(RESULT_OK, data);
+        finish();
+    }
+
     /* --------------------------------------------------- */
     /* > View Methods  */
     /* --------------------------------------------------- */
@@ -217,5 +226,10 @@ public class ImagePickerActivity extends AppCompatActivity implements ImagePicke
     @Override
     public void finishPickImages(List<Image> images) {
         imagePickerFragment.finishPickImages(images);
+    }
+
+    @Override
+    public void requestExternalCameraImage(List<Image> images) {
+        imagePickerFragment.requestExternalCameraImage(images);
     }
 }

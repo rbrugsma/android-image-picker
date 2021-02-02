@@ -3,7 +3,6 @@ package com.rickb.imagepicker.features.recyclers;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Parcelable;
-import android.widget.Toast;
 
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,7 +17,7 @@ import com.rickb.imagepicker.features.imageloader.ImageLoader;
 import com.rickb.imagepicker.helper.ConfigUtils;
 import com.rickb.imagepicker.helper.ImagePickerUtils;
 import com.rickb.imagepicker.listeners.OnFolderClickListener;
-import com.rickb.imagepicker.listeners.OnImageClickListener;
+import com.rickb.imagepicker.listeners.ActionHandler;
 import com.rickb.imagepicker.listeners.OnImageSelectedListener;
 import com.rickb.imagepicker.listeners.OnTotalSizeLimitReachedListener;
 import com.rickb.imagepicker.model.Folder;
@@ -95,7 +94,7 @@ public class RecyclerViewManager {
         setItemDecoration(columns);
     }
 
-    public void setupAdapters(ArrayList<Image> selectedImages, OnImageClickListener onImageClickListener, OnFolderClickListener onFolderClickListener) {
+    public void setupAdapters(ArrayList<Image> selectedImages, ActionHandler onImageClickListener, OnFolderClickListener onFolderClickListener) {
         if (config.getMode() == MODE_SINGLE && selectedImages != null && selectedImages.size() > 1) {
             selectedImages = null;
         }

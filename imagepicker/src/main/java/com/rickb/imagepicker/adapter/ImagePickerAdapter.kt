@@ -17,7 +17,7 @@ import com.rickb.imagepicker.extension.debounceClicks
 import com.rickb.imagepicker.features.imageloader.ImageLoader
 import com.rickb.imagepicker.features.imageloader.ImageType
 import com.rickb.imagepicker.helper.ImagePickerUtils
-import com.rickb.imagepicker.listeners.OnImageClickListener
+import com.rickb.imagepicker.listeners.ActionHandler
 import com.rickb.imagepicker.listeners.OnImageSelectedListener
 import com.rickb.imagepicker.listeners.OnTotalSizeLimitReachedListener
 import com.rickb.imagepicker.model.Image
@@ -33,7 +33,7 @@ class ImagePickerAdapter(
         context: Context,
         imageLoader: ImageLoader,
         selectedImages: List<Image>,
-        private val itemClickListener: OnImageClickListener,
+        private val actionHandler: ActionHandler,
         private val maxTotalSizeLimit: Double?,
         private val maxTotalSelectionsLimit: Int?,
 ) : BaseListAdapter<ImagePickerAdapter.BaseImagePickerViewHolder>(context, imageLoader) {
@@ -155,7 +155,11 @@ class ImagePickerAdapter(
             alphaView.alpha = if (isSelected || isMaxTotalSizeReached() || isMaxTotalSelectionsReached()) 0.5f else 0f
 
             itemView.debounceClicks().observe {
-                val shouldSelect = itemClickListener.onImageClick(isSelected)
+                if (image.id == CAMERA_ICON_ID) {
+                    actionHandler.requestCameraImage()
+                    return@observe
+                }
+                val shouldSelect = actionHandler.onImageClick(isSelected)
 
                 if (isSelected) {
                     removeSelectedImage(image, position)
@@ -177,10 +181,13 @@ class ImagePickerAdapter(
     override fun getItemCount() = items.size
 
     fun setData(images: List<Image>) {
-        val imagesAndHeaders = addHeaders(images)
+        val imagesAndHeadersAndCameraIcon = addHeaders(images)
+                .run {
+                    addCameraIcon(this)
+                }
 
         this.items.clear()
-        this.items.addAll(imagesAndHeaders)
+        this.items.addAll(imagesAndHeadersAndCameraIcon)
     }
 
     private fun addHeaders(images: List<Image>): List<PickerItem> = mutableListOf<PickerItem>()
@@ -218,6 +225,20 @@ class ImagePickerAdapter(
                             add(image)
                         }
             }
+
+    private fun addCameraIcon(images: List<PickerItem>): List<PickerItem>  {
+        // Add the camera icon after at first position (but after the first header)
+        val firstHeaderIndex = images.indexOfFirst { it is ImageHeaderPlaceHolder }
+
+        val lastRecentTime = images.getOrNull(firstHeaderIndex + 1)?.lastChangedTimestamp?.apply {
+            this - 1L
+        } ?: 0
+        val cameraIconTimeAdjusted = createCameraIcon(lastRecentTime)
+
+        return images.toMutableList().apply {
+            add(firstHeaderIndex + 1, cameraIconTimeAdjusted)
+        }
+    }
 
     private fun addSelected(image: Image, position: Int) {
         mutateSelection {
@@ -309,6 +330,12 @@ class ImagePickerAdapter(
         }))
     }
 
+    /**
+     * Creates the Image model for the camera icon.
+     * @param lastChangedTimestamp needs to be a tiny bit before the first actual photo from gallery, so that it appears at the first item under "recent" header.
+     */
+    private fun createCameraIcon(lastChangedTimestamp: Long) = Image(CAMERA_ICON_ID, "camera", "", lastChangedTimestamp)
+
     companion object {
         // 1 MB = 1048576 Bytes.
         const val MB_TO_BYTES_CONVERSION_MULTIPLIER = 1048576
@@ -319,8 +346,10 @@ class ImagePickerAdapter(
         private const val MILLIS_IN_DAY = 1000 * 60 * 60 * 24
         private const val MILLIS_IN_WEEK = MILLIS_IN_DAY * 7
 
+        const val CAMERA_ICON_ID = 83621L
+
         @Parcelize
-        open class PickerItem(private val lastChangedTimestamp: Long) : Parcelable {
+        open class PickerItem(open val lastChangedTimestamp: Long) : Parcelable {
             /**
              * How many weeks ago this image's file was last edited.
              */
