@@ -67,7 +67,6 @@ class MainActivity : AppCompatActivity() {
                     .showSelectionLimitBottomView(true)
                     .totalSizeLimit(3.0)
                     .amountOfMBsAlreadyInUse(1.0)
-                    .showCamera(true)
                     .returnMode(if (returnAfterCapture) ReturnMode.ALL else ReturnMode.NONE) // set whether pick action or camera action should return immediate result or not. Only works in single mode for image picker
                     .folderMode(folderMode) // set folder mode (false by default)
                     .includeVideo(includeVideo) // include video (false by default)
