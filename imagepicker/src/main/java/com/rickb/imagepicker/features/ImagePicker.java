@@ -236,6 +236,18 @@ public abstract class ImagePicker {
     /* > Helper */
     /* --------------------------------------------------- */
 
+    public static boolean isImagesResult(int requestCode, int resultCode, Intent data) {
+        return resultCode == Activity.RESULT_OK
+                && requestCode == IpCons.RC_IMAGE_PICKER
+                && data.hasExtra(IpCons.EXTRA_SELECTED_IMAGES);
+    }
+
+    public static boolean isExternalCameraRequest(int requestCode, int resultCode, Intent data) {
+        return resultCode == Activity.RESULT_OK
+                && requestCode == IpCons.RC_IMAGE_PICKER
+                && data.hasExtra(IpCons.EXTRA_REQUEST_EXTERNAL_CAMERA);
+    }
+
     public static boolean shouldHandle(int requestCode, int resultCode, Intent data) {
         return resultCode == Activity.RESULT_OK
                 && requestCode == IpCons.RC_IMAGE_PICKER

@@ -9,4 +9,5 @@ public class IpCons {
     public static final int RC_IMAGE_PICKER = 0x229;
 
     static final String EXTRA_SELECTED_IMAGES = "selectedImages";
+    static final String EXTRA_REQUEST_EXTERNAL_CAMERA = "requestCamera";
 }

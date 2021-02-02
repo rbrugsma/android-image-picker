@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Environment
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.rickb.imagepicker.features.*
 import com.rickb.imagepicker.features.imageloader.DefaultImageLoader
@@ -102,11 +103,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (ImagePicker.shouldHandle(requestCode, resultCode, data)) {
+        if (ImagePicker.isImagesResult(requestCode, resultCode, data)) {
             images.clear()
             images.addAll(ImagePicker.getImages(data))
             printImages(images)
             return
+        } else if (ImagePicker.isExternalCameraRequest(requestCode, resultCode, data)) {
+            // Camera image requested.
+            Log.d(this.javaClass.simpleName, "onActivityResult: ")
         }
         super.onActivityResult(requestCode, resultCode, data)
     }

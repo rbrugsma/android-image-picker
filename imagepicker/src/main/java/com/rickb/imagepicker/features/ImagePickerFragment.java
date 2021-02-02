@@ -39,6 +39,7 @@ import com.rickb.imagepicker.helper.ConfigUtils;
 import com.rickb.imagepicker.helper.ImagePickerPreferences;
 import com.rickb.imagepicker.helper.IpCrasher;
 import com.rickb.imagepicker.helper.IpLogger;
+import com.rickb.imagepicker.listeners.ActionHandler;
 import com.rickb.imagepicker.model.Folder;
 import com.rickb.imagepicker.model.Image;
 import com.rickb.imagepicker.view.SnackBarView;
@@ -199,8 +200,19 @@ public class ImagePickerFragment extends Fragment implements ImagePickerView {
                 getResources().getConfiguration().orientation
         );
 
-        recyclerViewManager.setupAdapters(selectedImages, (isSelected) -> recyclerViewManager.selectImage(isSelected)
-                , bucket -> setImageAdapter(bucket.getImages()));
+        ActionHandler handler = new ActionHandler() {
+            @Override
+            public boolean onImageClick(boolean isSelected) {
+                return recyclerViewManager.selectImage(isSelected);
+            }
+
+            @Override
+            public void requestCameraImage() {
+                requestExternalCameraImage(recyclerViewManager.getSelectedImages());
+            }
+        };
+
+        recyclerViewManager.setupAdapters(selectedImages, handler, bucket -> setImageAdapter(bucket.getImages()));
 
         recyclerViewManager.setImageSelectedListener(selectedImage -> {
             attachmentLimitMessage.setVisibility(View.GONE);
@@ -549,6 +561,14 @@ public class ImagePickerFragment extends Fragment implements ImagePickerView {
         ArrayList<Image> imageArrayList = new ArrayList<>(images);
         data.putParcelableArrayListExtra(IpCons.EXTRA_SELECTED_IMAGES, imageArrayList);
         interactionListener.finishPickImages(data);
+    }
+
+    @Override
+    public void requestExternalCameraImage(List<Image> images) {
+        Intent data = new Intent();
+        ArrayList<Image> imageArrayList = new ArrayList<>(images);
+        data.putParcelableArrayListExtra(IpCons.EXTRA_SELECTED_IMAGES, imageArrayList);
+        interactionListener.requestExternalCameraImage(data);
     }
 
     @Override
