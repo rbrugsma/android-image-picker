@@ -181,6 +181,8 @@ class ImagePickerAdapter(
     override fun getItemCount() = items.size
 
     fun setData(images: List<Image>) {
+        updateSelectedImages(images)
+
         val imagesAndHeadersAndCameraIcon = addHeaders(images)
                 .run {
                     addCameraIcon(this)
@@ -188,6 +190,13 @@ class ImagePickerAdapter(
 
         this.items.clear()
         this.items.addAll(imagesAndHeadersAndCameraIcon)
+    }
+
+    private fun updateSelectedImages(images: List<Image>) {
+        selectedImages.toList().forEachIndexed { index, image ->
+            val updatedImage = images.find { it.id == image.id } ?: image
+            selectedImages[index] = updatedImage
+        }
     }
 
     private fun addHeaders(images: List<Image>): List<PickerItem> = mutableListOf<PickerItem>()
