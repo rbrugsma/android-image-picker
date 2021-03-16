@@ -175,7 +175,7 @@ class ImagePickerAdapter(
     }
 
     private fun isSelected(image: Image): Boolean {
-        return selectedImages.any { it.path == image.path }
+        return selectedImages.any { it.id == image.id }
     }
 
     override fun getItemCount() = items.size

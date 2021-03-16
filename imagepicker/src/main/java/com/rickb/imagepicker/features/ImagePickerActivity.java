@@ -187,7 +187,6 @@ public class ImagePickerActivity extends AppCompatActivity implements ImagePicke
 
     @Override
     public void requestExternalCameraImage(Intent data) {
-//        Intent data = new Intent();
         data.putExtra(IpCons.EXTRA_REQUEST_EXTERNAL_CAMERA, true);
 
         setResult(RESULT_OK, data);
