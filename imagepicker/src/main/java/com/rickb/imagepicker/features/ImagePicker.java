@@ -45,6 +45,10 @@ public abstract class ImagePicker {
         public void start() {
             activity.startActivityForResult(getIntent(activity), IpCons.RC_IMAGE_PICKER);
         }
+
+        public Intent getIntent() {
+            return getIntent(activity);
+        }
     }
 
     public static class ImagePickerWithFragment extends ImagePicker {
