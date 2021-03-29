@@ -101,7 +101,8 @@ public class RecyclerViewManager {
 
         /* Init folder and image adapter */
         final ImageLoader imageLoader = ImagePickerComponentHolder.getInstance().getImageLoader();
-        imageAdapter = new ImagePickerAdapter(context, imageLoader, selectedImages, onImageClickListener, config.totalSizeLimit() - config.getAmountOfMBsAlreadyInUse(), config.getLimit());
+        String publicAppFolderPath = config.getPublicAppFolderPath();
+        imageAdapter = new ImagePickerAdapter(context, imageLoader, selectedImages, onImageClickListener, config.totalSizeLimit() - config.getAmountOfMBsAlreadyInUse(), config.getLimit(), publicAppFolderPath, config.getQualityAdjustment());
         folderAdapter = new FolderPickerAdapter(context, imageLoader, bucket -> {
             foldersState = recyclerView.getLayoutManager().onSaveInstanceState();
             onFolderClickListener.onFolderClick(bucket);

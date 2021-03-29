@@ -13,6 +13,7 @@ class Image(
         val id: Long,
         val name: String,
         val path: String,
+        var compressedFilePath: String? = null,
         override val lastChangedTimestamp: Long
 ) : ImagePickerAdapter.Companion.PickerItem(lastChangedTimestamp)  {
 

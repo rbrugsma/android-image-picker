@@ -156,7 +156,7 @@ public class DefaultImageFileLoader implements ImageFileLoader {
                     String name = cursor.getString(cursor.getColumnIndex(projection[1]));
                     String bucket = cursor.getString(cursor.getColumnIndex(projection[3]));
 
-                    Image image = new Image(id, name, path, file.lastModified());
+                    Image image = new Image(id, name, path, null, file.lastModified());
 
                     temp.add(image);
 

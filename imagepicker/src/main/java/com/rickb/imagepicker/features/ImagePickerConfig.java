@@ -7,6 +7,7 @@ import androidx.annotation.StyleRes;
 
 import com.rickb.imagepicker.features.common.BaseConfig;
 import com.rickb.imagepicker.model.Image;
+import com.rickb.imagepicker.model.ImageQuality;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ public class ImagePickerConfig extends BaseConfig implements Parcelable {
     private ArrayList<File> excludedImages;
 
     private String folderTitle;
+    private String publicAppFolderPath;
     private String imageTitle;
     private String doneButtonText;
     private int arrowColor = NO_COLOR;
@@ -34,6 +36,8 @@ public class ImagePickerConfig extends BaseConfig implements Parcelable {
     private boolean showCamera;
 
     private transient String language;
+
+    private transient ImageQuality quality;
 
     private Boolean shouldShowSelectionLimitBottomView;
 
@@ -108,6 +112,14 @@ public class ImagePickerConfig extends BaseConfig implements Parcelable {
         this.folderTitle = folderTitle;
     }
 
+    public String getPublicAppFolderPath() {
+        return publicAppFolderPath;
+    }
+
+    public void setPublicAppFolderPath(String publicAppFolderPath) {
+        this.publicAppFolderPath = publicAppFolderPath;
+    }
+
     public String getImageTitle() {
         return imageTitle;
     }
@@ -125,6 +137,7 @@ public class ImagePickerConfig extends BaseConfig implements Parcelable {
     }
 
     public ArrayList<Image> getSelectedImages() {
+        // Create compressed version for all selected images? Check if nog already done at other place, in adapter.
         return selectedImages;
     }
 
@@ -175,6 +188,14 @@ public class ImagePickerConfig extends BaseConfig implements Parcelable {
         return language;
     }
 
+    public void setQualityAdjustment(ImageQuality quality) {
+        this.quality = quality;
+    }
+
+    public ImageQuality getQualityAdjustment() {
+        return quality;
+    }
+
     public void showSelectionLimitBottomView(boolean shouldShow) {
         this.shouldShowSelectionLimitBottomView = shouldShow;
     }
@@ -221,6 +242,7 @@ public class ImagePickerConfig extends BaseConfig implements Parcelable {
         }
 
         dest.writeString(this.folderTitle);
+        dest.writeString(this.publicAppFolderPath);
         dest.writeString(this.imageTitle);
         dest.writeString(this.doneButtonText);
         dest.writeInt(this.arrowColor);
@@ -235,6 +257,7 @@ public class ImagePickerConfig extends BaseConfig implements Parcelable {
         dest.writeByte(this.includeAnimation ? (byte) 1 : (byte) 0);
         dest.writeByte(this.showCamera ? (byte) 1 : (byte) 0);
         dest.writeByte(this.shouldShowSelectionLimitBottomView ? (byte) 1 : (byte) 0);
+        dest.writeParcelable(this.quality, -1);
     }
 
     protected ImagePickerConfig(Parcel in) {
@@ -248,6 +271,7 @@ public class ImagePickerConfig extends BaseConfig implements Parcelable {
         }
 
         this.folderTitle = in.readString();
+        this.publicAppFolderPath = in.readString();
         this.imageTitle = in.readString();
         this.doneButtonText = in.readString();
         this.arrowColor = in.readInt();
@@ -262,6 +286,7 @@ public class ImagePickerConfig extends BaseConfig implements Parcelable {
         this.includeAnimation = in.readByte() != 0;
         this.showCamera = in.readByte() != 0;
         this.shouldShowSelectionLimitBottomView = in.readByte() != 0;
+        this.quality = in.readParcelable(ImageQuality.class.getClassLoader());
     }
 
     public static final Creator<ImagePickerConfig> CREATOR = new Creator<ImagePickerConfig>() {

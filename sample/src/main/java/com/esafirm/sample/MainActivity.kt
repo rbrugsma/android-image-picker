@@ -13,6 +13,8 @@ import com.rickb.imagepicker.model.Image
 import com.rickb.rximagepicker.RxImagePicker
 import kotlinx.android.synthetic.main.activity_main.*
 import rx.Observable
+import java.io.File
+import java.io.File.separator
 
 class MainActivity : AppCompatActivity() {
 
@@ -61,10 +63,22 @@ class MainActivity : AppCompatActivity() {
             val onlyVideo = ef_switch_only_video.isChecked
             val isExclude = ef_switch_include_exclude.isChecked
 
+            val basePhotoDirectory: File by lazy {
+                val externalStoragePath = getExternalFilesDir(null)?.absolutePath
+                val directoryPath = externalStoragePath + File.separator + "VoNo" + File.separator + "Pictures"
+
+                val dirFile = File(directoryPath)
+                if (!dirFile.exists()) {
+                    dirFile.mkdirs()
+                }
+                dirFile
+            }
+
             val imagePicker = ImagePicker.create(this)
                     .language("en") // Set image picker language
                     .theme(R.style.ImagePickerTheme)
                     .showSelectionLimitBottomView(true)
+//                    .qualityAdjustment(720, 480)
                     .totalSizeLimit(3.0)
                     .amountOfMBsAlreadyInUse(1.0)
                     .returnMode(if (returnAfterCapture) ReturnMode.ALL else ReturnMode.NONE) // set whether pick action or camera action should return immediate result or not. Only works in single mode for image picker
@@ -75,6 +89,7 @@ class MainActivity : AppCompatActivity() {
                     .toolbarFolderTitle("Folder") // folder selection title
                     .toolbarImageTitle("Tap to select") // image selection title
                     .toolbarDoneButtonText("DONE") // done button text
+                    .publicAppFolderPath(basePhotoDirectory.path)
 
             ImagePickerComponentHolder.getInstance().imageLoader = DefaultImageLoader()
 
@@ -88,7 +103,7 @@ class MainActivity : AppCompatActivity() {
             } else {
                 imagePicker.origin(images) // original selected images, used in multi mode
             }
-            return imagePicker.limit(4) // max images can be selected (99 by default)
+            return imagePicker.limit(10) // max images can be selected (99 by default)
                     .showCamera(true) // show camera or not (true by default)
                     .imageDirectory("Camera") // captured image directory name ("Camera" folder by default)
                     .imageFullDirectory(Environment.getExternalStorageDirectory().path) // can be full path

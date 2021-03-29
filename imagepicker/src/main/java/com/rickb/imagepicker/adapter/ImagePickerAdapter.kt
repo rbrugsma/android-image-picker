@@ -1,6 +1,8 @@
 package com.rickb.imagepicker.adapter
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Parcelable
 import android.util.Log
 import android.view.View
@@ -17,16 +19,21 @@ import com.rickb.imagepicker.extension.debounceClicks
 import com.rickb.imagepicker.features.imageloader.ImageLoader
 import com.rickb.imagepicker.features.imageloader.ImageType
 import com.rickb.imagepicker.helper.ImagePickerUtils
+import com.rickb.imagepicker.helper.addCompressedFile
 import com.rickb.imagepicker.listeners.ActionHandler
 import com.rickb.imagepicker.listeners.OnImageSelectedListener
 import com.rickb.imagepicker.listeners.OnTotalSizeLimitReachedListener
 import com.rickb.imagepicker.model.Image
+import com.rickb.imagepicker.model.ImageQuality
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.ef_imagepicker_header.view.*
 import kotlinx.android.synthetic.main.ef_imagepicker_item_image.view.*
+import org.apache.commons.io.IOUtils
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.util.*
 
 class ImagePickerAdapter(
@@ -36,6 +43,8 @@ class ImagePickerAdapter(
         private val actionHandler: ActionHandler,
         private val maxTotalSizeLimit: Double?,
         private val maxTotalSelectionsLimit: Int?,
+        private val publicAppDirectory: String?,
+        private val imageQuality: ImageQuality?
 ) : BaseListAdapter<ImagePickerAdapter.BaseImagePickerViewHolder>(context, imageLoader) {
     /**
      * Disposables that will be disposed of during [.onDestroy]
@@ -235,7 +244,7 @@ class ImagePickerAdapter(
                         }
             }
 
-    private fun addCameraIcon(images: List<PickerItem>): List<PickerItem>  {
+    private fun addCameraIcon(images: List<PickerItem>): List<PickerItem> {
         // Add the camera icon after at first position (but after the first header)
         val firstHeaderIndex = images.indexOfFirst { it is ImageHeaderPlaceHolder }
 
@@ -251,6 +260,10 @@ class ImagePickerAdapter(
 
     private fun addSelected(image: Image, position: Int) {
         mutateSelection {
+            publicAppDirectory?.let {
+                addCompressedFile(image, it, imageQuality)
+            }
+
             selectedImages.add(image)
             notifyItemChanged(position)
         }
@@ -301,8 +314,10 @@ class ImagePickerAdapter(
     private fun getTotalSelectedFileSize(): Long {
         var totalFileSize: Long = 0
         for (image in selectedImages) {
-            val file = File(image.path)
-            totalFileSize += file.length()
+            image.compressedFilePath?.let {
+                val file = File(it)
+                totalFileSize += file.length()
+            }
         }
         return totalFileSize
     }
@@ -343,7 +358,7 @@ class ImagePickerAdapter(
      * Creates the Image model for the camera icon.
      * @param lastChangedTimestamp needs to be a tiny bit before the first actual photo from gallery, so that it appears at the first item under "recent" header.
      */
-    private fun createCameraIcon(lastChangedTimestamp: Long) = Image(CAMERA_ICON_ID, "camera", "", lastChangedTimestamp)
+    private fun createCameraIcon(lastChangedTimestamp: Long) = Image(CAMERA_ICON_ID, "camera", "", null, lastChangedTimestamp)
 
     companion object {
         // 1 MB = 1048576 Bytes.
