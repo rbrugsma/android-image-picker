@@ -14,6 +14,7 @@ import com.rickb.imagepicker.helper.ConfigUtils;
 import com.rickb.imagepicker.helper.IpLogger;
 import com.rickb.imagepicker.helper.LocaleManager;
 import com.rickb.imagepicker.model.Image;
+import com.rickb.imagepicker.model.ImageQuality;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -130,6 +131,11 @@ public abstract class ImagePicker {
         return this;
     }
 
+    public ImagePicker publicAppFolderPath(String path) {
+        config.setPublicAppFolderPath(path);
+        return this;
+    }
+
     public ImagePicker toolbarImageTitle(String title) {
         config.setImageTitle(title);
         return this;
@@ -203,6 +209,11 @@ public abstract class ImagePicker {
 
     public ImagePicker showSelectionLimitBottomView(boolean shouldShow) {
         config.showSelectionLimitBottomView(shouldShow);
+        return this;
+    }
+
+    public ImagePicker qualityAdjustment(int desiredWidth, int desiredHeight) {
+        config.setQualityAdjustment(new ImageQuality(desiredWidth, desiredHeight));
         return this;
     }
 

@@ -10,6 +10,7 @@ import com.bumptech.glide.Glide
 import com.rickb.imagepicker.features.ImagePicker
 import com.rickb.imagepicker.features.ReturnMode
 import kotlinx.android.synthetic.main.fragment_main.*
+import java.io.File
 
 class MainFragment : Fragment() {
 
@@ -22,19 +23,20 @@ class MainFragment : Fragment() {
 
         button_pick_fragment.setOnClickListener {
             ImagePicker.create(this@MainFragment)
-                .returnMode(ReturnMode.ALL) // set whether pick action or camera action should return immediate result or not. Only works in single mode for image picker
-                .folderMode(true) // set folder mode (false by default)
-                .single()
-                .toolbarFolderTitle("Folder") // folder selection title
-                .toolbarImageTitle("Tap to select")
-                .toolbarDoneButtonText("DONE") // done button text
-                .start(0) // image selection title
+                    .returnMode(ReturnMode.ALL) // set whether pick action or camera action should return immediate result or not. Only works in single mode for image picker
+                    .folderMode(true) // set folder mode (false by default)
+                    .single()
+                    .toolbarFolderTitle("Folder") // folder selection title
+                    .toolbarImageTitle("Tap to select")
+                    .toolbarDoneButtonText("DONE") // done button text
+                    .publicAppFolderPath("Pictures" + File.separator + "vono")
+                    .start(0) // image selection title
         }
 
         button_close.setOnClickListener {
             fragmentManager?.beginTransaction()
-                ?.remove(this@MainFragment)
-                ?.commitAllowingStateLoss()
+                    ?.remove(this@MainFragment)
+                    ?.commitAllowingStateLoss()
         }
     }
 
@@ -42,8 +44,8 @@ class MainFragment : Fragment() {
         val images = ImagePicker.getImages(data)
         if (images != null && images.isNotEmpty()) {
             Glide.with(img_fragment)
-                .load(images[0].uri)
-                .into(img_fragment)
+                    .load(images[0].uri)
+                    .into(img_fragment)
         }
         super.onActivityResult(requestCode, resultCode, data)
     }
