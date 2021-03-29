@@ -1,8 +1,6 @@
 package com.rickb.imagepicker.adapter
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Parcelable
 import android.util.Log
 import android.view.View
@@ -30,10 +28,7 @@ import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.ef_imagepicker_header.view.*
 import kotlinx.android.synthetic.main.ef_imagepicker_item_image.view.*
-import org.apache.commons.io.IOUtils
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
 import java.util.*
 
 class ImagePickerAdapter(
@@ -203,7 +198,12 @@ class ImagePickerAdapter(
 
     private fun updateSelectedImages(images: List<Image>) {
         selectedImages.toList().forEachIndexed { index, image ->
-            val updatedImage = images.find { it.id == image.id } ?: image
+            val updatedImage = images
+                    .find { it.id == image.id }
+                    ?.apply {
+                        compressedFilePath = image.compressedFilePath
+                    }
+                    ?: image
             selectedImages[index] = updatedImage
         }
     }
