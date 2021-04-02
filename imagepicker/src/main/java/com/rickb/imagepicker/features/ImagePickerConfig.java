@@ -137,7 +137,6 @@ public class ImagePickerConfig extends BaseConfig implements Parcelable {
     }
 
     public ArrayList<Image> getSelectedImages() {
-        // Create compressed version for all selected images? Check if nog already done at other place, in adapter.
         return selectedImages;
     }
 
