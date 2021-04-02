@@ -160,6 +160,8 @@ class ImagePickerAdapter(
 
             itemView.debounceClicks().observe {
                 if (image.id == CAMERA_ICON_ID) {
+                    if (isMaxTotalSizeReached()) return@observe
+                    if (isMaxTotalSelectionsReached()) return@observe
                     actionHandler.requestCameraImage()
                     return@observe
                 }
@@ -261,7 +263,10 @@ class ImagePickerAdapter(
     private fun addSelected(image: Image, position: Int) {
         mutateSelection {
             publicAppDirectory?.let {
-                addCompressedFile(image, it, imageQuality)
+                // only add compressed file if it wasn't present yet.
+                if (image.compressedFilePath == null) {
+                    addCompressedFile(image, it, imageQuality)
+                }
             }
 
             selectedImages.add(image)
@@ -305,7 +310,7 @@ class ImagePickerAdapter(
             getTotalSelectedFileSize() > (maxTotalSizeLimit
                     ?: Double.MAX_VALUE) * MB_TO_BYTES_CONVERSION_MULTIPLIER
 
-    fun isMaxTotalSelectionsReached() =
+    private fun isMaxTotalSelectionsReached() =
             selectedImages.size >= (maxTotalSelectionsLimit ?: Integer.MAX_VALUE)
 
     /**
@@ -359,6 +364,36 @@ class ImagePickerAdapter(
      * @param lastChangedTimestamp needs to be a tiny bit before the first actual photo from gallery, so that it appears at the first item under "recent" header.
      */
     private fun createCameraIcon(lastChangedTimestamp: Long) = Image(CAMERA_ICON_ID, "camera", "", null, lastChangedTimestamp)
+
+    /**
+     * Deletes all compressed images that were created. Should be called onDestroy.
+     * @param shouldAlsoDeleteSelected Whether the selected compressed images should also be deleted.
+     */
+    fun deleteCompressedImages(shouldAlsoDeleteSelected: Boolean, exclude: List<Image>) {
+        items
+                .filterIsInstance(Image::class.java)
+                .filter { image ->
+                    if (shouldAlsoDeleteSelected) true
+                    else selectedImages.find { it.id == image.id } == null
+                }
+                .filter { image ->
+                    exclude.find { it.id == image.id } == null
+                }
+                .map {
+                    it.compressedFilePath
+                }.forEach { path ->
+                    path?.let {
+                        deleteFile(it)
+                    }
+                }
+    }
+
+    private fun deleteFile(path: String) {
+        val file = File(path)
+        if (file.exists()) {
+            file.delete()
+        }
+    }
 
     companion object {
         // 1 MB = 1048576 Bytes.

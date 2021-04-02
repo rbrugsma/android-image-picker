@@ -230,4 +230,8 @@ public class RecyclerViewManager {
                 && !imageAdapter.getSelectedImages().isEmpty()
                 && (config.getReturnMode() != ReturnMode.ALL && config.getReturnMode() != ReturnMode.GALLERY_ONLY);
     }
+
+    public void deleteCompressedImages(boolean shouldAlsoDeleteSelected, List<Image> exclude) {
+        imageAdapter.deleteCompressedImages(shouldAlsoDeleteSelected, exclude);
+    }
 }

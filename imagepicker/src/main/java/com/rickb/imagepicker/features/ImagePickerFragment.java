@@ -84,6 +84,18 @@ public class ImagePickerFragment extends Fragment implements ImagePickerView {
     // The toast for 'X/X selected' which was added last.
     Toast lastAmountSelectedToast = null;
 
+    /**
+     * Whether the image picker is closing with results (when user clicked 'Done' or requested external camera image). If this is true, the created compressed files should NOT be deleted onDestroy.
+     */
+    boolean finishingWithResults = false;
+
+    boolean finishingForCameraRequest = false;
+
+    /**
+     * Whether backbutton is pressed. This is needed to know if files should be deleted onDestroy because the user goes back.
+     */
+    boolean backPressed = false;
+
     public ImagePickerFragment() {
         // Required empty public constructor.
     }
@@ -208,6 +220,7 @@ public class ImagePickerFragment extends Fragment implements ImagePickerView {
 
             @Override
             public void requestCameraImage() {
+                finishingForCameraRequest = true;
                 requestExternalCameraImage(recyclerViewManager.getSelectedImages());
             }
         };
@@ -288,6 +301,7 @@ public class ImagePickerFragment extends Fragment implements ImagePickerView {
      * Get all selected images then return image to caller activity
      */
     public void onDone() {
+        finishingWithResults = true;
         presenter.onDoneSelectImages(recyclerViewManager.getSelectedImages());
     }
 
@@ -498,10 +512,24 @@ public class ImagePickerFragment extends Fragment implements ImagePickerView {
                 .registerContentObserver(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, false, observer);
     }
 
-
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+        // TODO: wat als ie backpresst..?
+        if (backPressed) {
+            // All newly created files need to be deleted, but the initially passed images should remain.
+            List<Image> initialImages = config.getSelectedImages();
+            recyclerViewManager.deleteCompressedImages(true, initialImages);
+        } else if (finishingForCameraRequest) {
+            // All newly created files need to be deleted, but the initially passed images should remain.
+            List<Image> initialImages = config.getSelectedImages();
+            recyclerViewManager.deleteCompressedImages(false, initialImages);
+        } else if (!finishingWithResults) {
+            // Delete all compressed image files that were created.
+            recyclerViewManager.deleteCompressedImages(false, new ArrayList());
+        }
+
         if (presenter != null) {
             presenter.abortLoad();
             presenter.detachView();
@@ -532,6 +560,7 @@ public class ImagePickerFragment extends Fragment implements ImagePickerView {
             updateTitle();
             return true;
         }
+        backPressed = true;
         return false;
     }
 
