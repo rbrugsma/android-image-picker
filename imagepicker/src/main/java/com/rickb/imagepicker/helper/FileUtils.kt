@@ -1,21 +1,31 @@
 package com.rickb.imagepicker.helper
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.ImageDecoder
+import android.os.Build
+import android.provider.MediaStore
 import com.rickb.imagepicker.model.Image
 import com.rickb.imagepicker.model.ImageQuality
 import java.io.File
 import java.io.FileOutputStream
 
-fun addCompressedFile(image: Image, publicAppDirectory: String?, imageQuality: ImageQuality?) {
+fun addCompressedFile(context: Context, image: Image, publicAppDirectory: String?, imageQuality: ImageQuality?) {
     val directory = publicAppDirectory ?: return
 
     val file = File(directory, "compressed${System.currentTimeMillis()}")
     file.createNewFile()
 
     val outputStream = FileOutputStream(file)
-    BitmapFactory.decodeFile(image.path)?.let { bitmap ->
 
+    val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, image.uri))
+    } else {
+        MediaStore.Images.Media.getBitmap(context.contentResolver, image.uri)
+    }
+
+    bitmap?.let {
         val resizedBitmap = imageQuality?.let {
             applyQualityToBitmap(imageQuality, bitmap)
         } ?: bitmap
