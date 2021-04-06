@@ -33,6 +33,7 @@ fun addCompressedFile(context: Context, image: Image, publicAppDirectory: String
         resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
 
         outputStream.close()
+        
         image.compressedFilePath = file.path
     } ?: outputStream.close()
 }
