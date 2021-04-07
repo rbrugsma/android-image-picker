@@ -170,7 +170,7 @@ class ImagePickerAdapter(
                 if (isSelected) {
                     removeSelectedImage(image, position)
                 } else if (shouldSelect) {
-                    addSelected(image, position)
+                    addSelected(viewHolder.imageView.context, image, position)
                 }
             }
             container?.foreground = if (isSelected) ContextCompat.getDrawable(
@@ -260,12 +260,12 @@ class ImagePickerAdapter(
         }
     }
 
-    private fun addSelected(image: Image, position: Int) {
+    private fun addSelected(context: Context, image: Image, position: Int) {
         mutateSelection {
             publicAppDirectory?.let {
                 // only add compressed file if it wasn't present yet.
                 if (image.compressedFilePath == null) {
-                    addCompressedFile(image, it, imageQuality)
+                    addCompressedFile(context, image, it, imageQuality)
                 }
             }
 
