@@ -15,7 +15,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activityImage
+        <activity
             android:name=".CustomUIActivity"
             android:theme="@style/ef_AppTheme" />
         <activity
