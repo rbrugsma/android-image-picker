@@ -136,6 +136,7 @@ public class DefaultImageFileLoader implements ImageFileLoader {
             if (cursor.moveToLast()) {
                 do {
                     String path = cursor.getString(cursor.getColumnIndex(projection[2]));
+                    if (path == null) continue;
 
                     File file = makeSafeFile(path);
                     if (file == null) {
@@ -155,6 +156,9 @@ public class DefaultImageFileLoader implements ImageFileLoader {
                     long id = cursor.getLong(cursor.getColumnIndex(projection[0]));
                     String name = cursor.getString(cursor.getColumnIndex(projection[1]));
                     String bucket = cursor.getString(cursor.getColumnIndex(projection[3]));
+
+                    boolean isValid = id >= 0 && name != null && path != null && file.lastModified() > 0;
+                    if (!isValid) continue;
 
                     Image image = new Image(id, name, path, null, file.lastModified());
 
