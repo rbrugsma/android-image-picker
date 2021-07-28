@@ -168,7 +168,7 @@ public class RecyclerViewManager {
     }
 
     public void setImageAdapter(List<Image> images) {
-        imageAdapter.setData(images.subList(0, 2));
+        imageAdapter.setData(images);
         setItemDecoration(imageColumns);
         recyclerView.setAdapter(imageAdapter);
 
