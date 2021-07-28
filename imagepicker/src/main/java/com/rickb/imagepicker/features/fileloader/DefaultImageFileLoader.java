@@ -120,7 +120,7 @@ public class DefaultImageFileLoader implements ImageFileLoader {
         @Override
         public void run() {
             Cursor cursor = context.getContentResolver().query(getSourceUri(), projection,
-                    getQuerySelection(), null, MediaStore.Images.Media.DATE_ADDED);
+                    getQuerySelection(), null, MediaStore.Images.Media.DATE_MODIFIED);
 
             if (cursor == null) {
                 listener.onFailed(new NullPointerException());

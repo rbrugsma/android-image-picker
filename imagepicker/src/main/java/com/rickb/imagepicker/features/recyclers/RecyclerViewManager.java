@@ -16,8 +16,8 @@ import com.rickb.imagepicker.features.ReturnMode;
 import com.rickb.imagepicker.features.imageloader.ImageLoader;
 import com.rickb.imagepicker.helper.ConfigUtils;
 import com.rickb.imagepicker.helper.ImagePickerUtils;
-import com.rickb.imagepicker.listeners.OnFolderClickListener;
 import com.rickb.imagepicker.listeners.ActionHandler;
+import com.rickb.imagepicker.listeners.OnFolderClickListener;
 import com.rickb.imagepicker.listeners.OnImageSelectedListener;
 import com.rickb.imagepicker.listeners.OnTotalSizeLimitReachedListener;
 import com.rickb.imagepicker.model.Folder;
@@ -74,7 +74,7 @@ public class RecyclerViewManager {
         int columns = shouldShowFolder ? folderColumns : imageColumns;
         layoutManager = new GridLayoutManager(context, columns);
 
-        if (! shouldShowFolder) {
+        if (!shouldShowFolder) {
             layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
                 @Override
                 public int getSpanSize(int position) {
@@ -168,9 +168,19 @@ public class RecyclerViewManager {
     }
 
     public void setImageAdapter(List<Image> images) {
-        imageAdapter.setData(images);
+        imageAdapter.setData(images.subList(0, 2));
         setItemDecoration(imageColumns);
         recyclerView.setAdapter(imageAdapter);
+
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (!recyclerView.canScrollVertically(1)) {
+                    imageAdapter.addNextPage();
+                }
+            }
+        });
     }
 
     public void setFolderAdapter(List<Folder> folders) {

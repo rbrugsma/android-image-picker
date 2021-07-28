@@ -186,16 +186,43 @@ class ImagePickerAdapter(
 
     override fun getItemCount() = items.size
 
-    fun setData(images: List<Image>) {
-        updateSelectedImages(images)
+    private val allImages: MutableList<Image> = emptyList<Image>().toMutableList()
+    private val showingImages: MutableList<Image> = emptyList<Image>().toMutableList()
+    private var nextPageIndex = 0
 
-        val imagesAndHeadersAndCameraIcon = addHeaders(images)
+    fun setData(images: List<Image>) {
+        allImages.clear()
+        allImages.addAll(images)
+
+        nextPageIndex = 0
+        addNextPage()
+    }
+
+    fun addNextPage() {
+        if (showingImages.size == allImages.size || allImages.isEmpty()) {
+            // All images are added already.
+            return
+        }
+
+        // Make sure the indexes are not outside bounds of allImages.
+        val pageStartIndex = (allImages.size - 1).coerceAtMost(nextPageIndex * PAGE_SIZE)
+        val pageEndIndex = (allImages.size).coerceAtMost(((nextPageIndex + 1) * PAGE_SIZE))
+        val page = allImages.subList(pageStartIndex, pageEndIndex)
+        showingImages.addAll(page)
+
+        // Add next page from allImages to showingImages.
+        nextPageIndex ++
+
+        updateSelectedImages(showingImages)
+
+        val imagesAndHeadersAndCameraIcon = addHeaders(showingImages)
                 .run {
                     addCameraIcon(this)
                 }
 
         this.items.clear()
         this.items.addAll(imagesAndHeadersAndCameraIcon)
+        notifyDataSetChanged()
     }
 
     private fun updateSelectedImages(images: List<Image>) {
@@ -218,7 +245,6 @@ class ImagePickerAdapter(
                 var needsAdditionalHeader = false
 
                 images
-                        .sortedByDescending { it.lastChangedTimestamp }
                         .forEachIndexed { index, image ->
                             val weeksAgo = image.weeksAgo
                             val isDifferentWeeksAgo = weeksAgo != lastAddedHeaderTimeStamp
@@ -406,6 +432,11 @@ class ImagePickerAdapter(
         private const val MILLIS_IN_WEEK = MILLIS_IN_DAY * 7
 
         const val CAMERA_ICON_ID = 83621L
+
+        /**
+         * Amount of images in a page that will be added to the itemset at once.
+         */
+        private const val PAGE_SIZE = 500
 
         @Parcelize
         open class PickerItem(open val lastChangedTimestamp: Long) : Parcelable {
