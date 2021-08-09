@@ -167,20 +167,16 @@ public class RecyclerViewManager {
                 : String.format(context.getString(R.string.ef_selected_with_limit), imageSize, config.getLimit());
     }
 
-    public void setImageAdapter(List<Image> images) {
+    public void setImageAdapter(final List<Image> images) {
         imageAdapter.setData(images);
         setItemDecoration(imageColumns);
         recyclerView.setAdapter(imageAdapter);
 
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-                if (!recyclerView.canScrollVertically(1)) {
-                    imageAdapter.addNextPage();
-                }
-            }
-        });
+        setScrollListener();
+    }
+
+    public void addPage(final List<Image> images, int page) {
+        imageAdapter.addNextPage(images, page);
     }
 
     public void setFolderAdapter(List<Folder> folders) {
@@ -243,5 +239,20 @@ public class RecyclerViewManager {
 
     public void deleteCompressedImages(boolean shouldAlsoDeleteSelected, List<Image> exclude) {
         imageAdapter.deleteCompressedImages(shouldAlsoDeleteSelected, exclude);
+    }
+
+    private void setScrollListener() {
+        if (recyclerView == null || imageAdapter == null) {
+            return;
+        }
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (!recyclerView.canScrollVertically(1)) {
+                    imageAdapter.requestNextPage();
+                }
+            }
+        });
     }
 }
