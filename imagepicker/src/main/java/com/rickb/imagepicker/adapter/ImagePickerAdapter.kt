@@ -53,6 +53,14 @@ class ImagePickerAdapter(
     private var onTotalSizeLimitReachedListener: OnTotalSizeLimitReachedListener? = null
     private val videoDurationHolder = HashMap<Long, String?>()
 
+    /**
+     * Amount of pages with images that are added.
+     */
+    private var nextPageAdded = 0
+
+    private val showingImages: MutableList<Image> = emptyList<Image>().toMutableList()
+    private var nextPageIndex = 0
+
     private var wasTotalSizeLimitReached = false
     var wasTotalSelectionLimitReached = false
 
@@ -186,32 +194,18 @@ class ImagePickerAdapter(
 
     override fun getItemCount() = items.size
 
-    private val allImages: MutableList<Image> = emptyList<Image>().toMutableList()
-    private val showingImages: MutableList<Image> = emptyList<Image>().toMutableList()
-    private var nextPageIndex = 0
-
     fun setData(images: List<Image>) {
-        allImages.clear()
-        allImages.addAll(images)
-
         nextPageIndex = 0
-        addNextPage()
+        nextPageAdded = 0
+        setFirstPage(images)
     }
 
-    fun addNextPage() {
-        if (showingImages.size == allImages.size || allImages.isEmpty()) {
-            // All images are added already.
-            return
-        }
-
+    private fun setFirstPage(images: List<Image>) {
         // Make sure the indexes are not outside bounds of allImages.
-        val pageStartIndex = (allImages.size - 1).coerceAtMost(nextPageIndex * PAGE_SIZE)
-        val pageEndIndex = (allImages.size).coerceAtMost(((nextPageIndex + 1) * PAGE_SIZE))
-        val page = allImages.subList(pageStartIndex, pageEndIndex)
+        val pageStartIndex = (images.size - 1).coerceAtMost(nextPageIndex * PAGE_SIZE)
+        val pageEndIndex = (images.size).coerceAtMost(((nextPageIndex + 1) * PAGE_SIZE))
+        val page = images.subList(pageStartIndex, pageEndIndex)
         showingImages.addAll(page)
-
-        // Add next page from allImages to showingImages.
-        nextPageIndex ++
 
         updateSelectedImages(showingImages)
 
@@ -223,6 +217,23 @@ class ImagePickerAdapter(
         this.items.clear()
         this.items.addAll(imagesAndHeadersAndCameraIcon)
         notifyDataSetChanged()
+    }
+
+    fun addNextPage(images: List<Image>, page: Int) {
+        val imagesAndHeaders = addHeaders(images)
+        this.items.addAll(imagesAndHeaders)
+
+        // Notify all changed because notifyItemRangeChanged(newRangeStart, images.size) had issues with scrolling further after new items were added.
+        notifyDataSetChanged()
+        nextPageAdded = page
+    }
+
+    fun requestNextPage() {
+        // Next page already requested but not added yet.
+        if (nextPageAdded > nextPageIndex) return
+
+        nextPageIndex++
+        actionHandler.requestNextPage(nextPageIndex)
     }
 
     private fun updateSelectedImages(images: List<Image>) {
@@ -239,7 +250,7 @@ class ImagePickerAdapter(
 
     private fun addHeaders(images: List<Image>): List<PickerItem> = mutableListOf<PickerItem>()
             .apply {
-                var lastAddedHeaderTimeStamp = 0
+                var lastAddedHeaderTimeStamp = items.lastOrNull()?.weeksAgo ?: 0 // 0
 
                 // If there are recent images this will be set to true until the first not-recent image is added (and so the 'last week' header is added).
                 var needsAdditionalHeader = false
@@ -250,7 +261,7 @@ class ImagePickerAdapter(
                             val isDifferentWeeksAgo = weeksAgo != lastAddedHeaderTimeStamp
 
                             // Add a header item before index 0 and for each image that is more than the amount of weeks ago of the previopusly added header.
-                            if (index == 0) {
+                            if (index == 0 && items.isEmpty()) {
                                 if (image.isRecent) {
                                     needsAdditionalHeader = true
                                 }

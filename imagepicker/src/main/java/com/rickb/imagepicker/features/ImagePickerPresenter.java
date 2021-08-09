@@ -52,19 +52,13 @@ class ImagePickerPresenter extends BasePresenter<ImagePickerView> {
     void loadImages(ImagePickerConfig config) {
         if (!isViewAttached()) return;
 
-        boolean isFolder = config.isFolderMode();
-        boolean includeVideo = config.isIncludeVideo();
-        boolean onlyVideo = config.isOnlyVideo();
-        boolean includeAnimation = config.isIncludeAnimation();
-        ArrayList<File> excludedImages = config.getExcludedImages();
-
         runOnUiIfAvailable(() -> getView().showLoading(true));
 
-        imageLoader.loadDeviceImages(isFolder, onlyVideo, includeVideo, includeAnimation, excludedImages, new ImageLoaderListener() {
+        imageLoader.loadDeviceImages(config, new ImageLoaderListener() {
             @Override
-            public void onImageLoaded(final List<Image> images, final List<Folder> folders) {
+            public void onImagePageLoaded(final List<Image> images, final List<Folder> folders, final int page) {
                 runOnUiIfAvailable(() -> {
-                    getView().showFetchCompleted(images, folders);
+                    getView().showFetchCompleted(images, folders, page);
 
                     final boolean isEmpty = folders != null
                             ? folders.isEmpty()
@@ -83,6 +77,10 @@ class ImagePickerPresenter extends BasePresenter<ImagePickerView> {
                 runOnUiIfAvailable(() -> getView().showError(throwable));
             }
         });
+    }
+
+    void requestNextPage(int page) {
+        imageLoader.loadNextPage(page);
     }
 
     void onDoneSelectImages(List<Image> selectedImages) {

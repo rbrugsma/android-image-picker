@@ -203,8 +203,8 @@ public class ImagePickerActivity extends AppCompatActivity implements ImagePicke
     }
 
     @Override
-    public void showFetchCompleted(List<Image> images, List<Folder> folders) {
-        imagePickerFragment.showFetchCompleted(images, folders);
+    public void showFetchCompleted(List<Image> images, List<Folder> folders, int page) {
+        imagePickerFragment.showFetchCompleted(images, folders, page);
     }
 
     @Override

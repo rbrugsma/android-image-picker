@@ -223,9 +223,14 @@ public class ImagePickerFragment extends Fragment implements ImagePickerView {
                 finishingForCameraRequest = true;
                 requestExternalCameraImage(recyclerViewManager.getSelectedImages());
             }
+
+            @Override
+            public void requestNextPage(int page) {
+                presenter.requestNextPage(page);
+            }
         };
 
-        recyclerViewManager.setupAdapters(selectedImages, handler, bucket -> setImageAdapter(bucket.getImages()));
+        recyclerViewManager.setupAdapters(selectedImages, handler, bucket -> addImages(bucket.getImages(), 0));
 
         recyclerViewManager.setImageSelectedListener(selectedImage -> {
             attachmentLimitMessage.setVisibility(View.GONE);
@@ -282,9 +287,14 @@ public class ImagePickerFragment extends Fragment implements ImagePickerView {
      * 2. Update item decoration
      * 3. Update title
      */
-    void setImageAdapter(List<Image> images) {
-        recyclerViewManager.setImageAdapter(images);
-        updateTitle();
+    void addImages(final List<Image> images, int page) {
+        if (page == 0) {
+            recyclerViewManager.setImageAdapter(images);
+            updateTitle();
+        }
+        else {
+            recyclerViewManager.addPage(images, page);
+        }
     }
 
     void setFolderAdapter(List<Folder> folders) {
@@ -606,12 +616,12 @@ public class ImagePickerFragment extends Fragment implements ImagePickerView {
     }
 
     @Override
-    public void showFetchCompleted(List<Image> images, List<Folder> folders) {
+    public void showFetchCompleted(List<Image> images, List<Folder> folders, int page) {
         ImagePickerConfig config = getImagePickerConfig();
         if (config != null && config.isFolderMode()) {
             setFolderAdapter(folders);
         } else {
-            setImageAdapter(images);
+            addImages(images, page);
         }
     }
 

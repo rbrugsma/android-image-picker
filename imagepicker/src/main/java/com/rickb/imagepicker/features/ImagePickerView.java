@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface ImagePickerView extends MvpView {
     void showLoading(boolean isLoading);
-    void showFetchCompleted(List<Image> images, List<Folder> folders);
+    void showFetchCompleted(List<Image> images, List<Folder> folders, int page);
     void showError(Throwable throwable);
     void showEmpty();
     void showCapturedImage();

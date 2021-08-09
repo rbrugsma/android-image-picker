@@ -7,6 +7,7 @@ import android.provider.MediaStore;
 
 import androidx.annotation.Nullable;
 
+import com.rickb.imagepicker.features.ImagePickerConfig;
 import com.rickb.imagepicker.features.common.ImageLoaderListener;
 import com.rickb.imagepicker.helper.ImagePickerUtils;
 import com.rickb.imagepicker.model.Folder;
@@ -25,6 +26,9 @@ public class DefaultImageFileLoader implements ImageFileLoader {
     private Context context;
     private ExecutorService executorService;
 
+    private ImagePickerConfig mConfig;
+    private ImageLoaderListener mListener;
+
     public DefaultImageFileLoader(Context context) {
         this.context = context.getApplicationContext();
     }
@@ -36,15 +40,31 @@ public class DefaultImageFileLoader implements ImageFileLoader {
             MediaStore.Images.Media.BUCKET_DISPLAY_NAME
     };
 
+    public void loadNextPage(int page) {
+
+        loadDeviceImagesPage(page);
+    }
+
     @Override
     public void loadDeviceImages(
-            final boolean isFolderMode,
-            final boolean onlyVideo,
-            final boolean includeVideo,
-            final boolean includeAnimation,
-            final ArrayList<File> excludedImages,
+            final ImagePickerConfig config,
             final ImageLoaderListener listener
     ) {
+        mConfig = config;
+        mListener = listener;
+
+        loadDeviceImagesPage(0);
+    }
+
+    public void loadDeviceImagesPage(int page) {
+        if (mConfig == null || mListener == null) return;
+
+        boolean isFolderMode = mConfig.isFolderMode();
+        boolean includeVideo = mConfig.isIncludeVideo();
+        boolean onlyVideo = mConfig.isOnlyVideo();
+        boolean includeAnimation = mConfig.isIncludeAnimation();
+        ArrayList<File> excludedImages = mConfig.getExcludedImages();
+
         getExecutorService().execute(
                 new ImageLoadRunnable(
                         isFolderMode,
@@ -52,7 +72,8 @@ public class DefaultImageFileLoader implements ImageFileLoader {
                         includeVideo,
                         includeAnimation,
                         excludedImages,
-                        listener
+                        mListener,
+                        page
                 ));
     }
 
@@ -79,6 +100,9 @@ public class DefaultImageFileLoader implements ImageFileLoader {
         private boolean includeAnimation;
         private ArrayList<File> exlucedImages;
         private ImageLoaderListener listener;
+        private int page;
+
+        int PAGE_SIZE = 130;
 
         ImageLoadRunnable(
                 boolean isFolderMode,
@@ -86,7 +110,8 @@ public class DefaultImageFileLoader implements ImageFileLoader {
                 boolean includeVideo,
                 boolean includeAnimation,
                 ArrayList<File> excludedImages,
-                ImageLoaderListener listener
+                ImageLoaderListener listener,
+                int page
         ) {
             this.isFolderMode = isFolderMode;
             this.includeVideo = includeVideo;
@@ -94,6 +119,7 @@ public class DefaultImageFileLoader implements ImageFileLoader {
             this.onlyVideo = onlyVideo;
             this.exlucedImages = excludedImages;
             this.listener = listener;
+            this.page = page;
         }
 
         private String getQuerySelection() {
@@ -119,6 +145,7 @@ public class DefaultImageFileLoader implements ImageFileLoader {
 
         @Override
         public void run() {
+            int imagesLoaded = 0;
             Cursor cursor = context.getContentResolver().query(getSourceUri(), projection,
                     getQuerySelection(), null, MediaStore.Images.Media.DATE_MODIFIED);
 
@@ -134,6 +161,9 @@ public class DefaultImageFileLoader implements ImageFileLoader {
             }
 
             if (cursor.moveToLast()) {
+                for(int i = 0; i < page * PAGE_SIZE; i++) {
+                    if (!cursor.moveToPrevious()) return;
+                }
                 do {
                     String path = cursor.getString(cursor.getColumnIndex(projection[2]));
                     if (path == null) continue;
@@ -173,6 +203,19 @@ public class DefaultImageFileLoader implements ImageFileLoader {
                         folder.getImages().add(image);
                     }
 
+                    imagesLoaded ++;
+                    if (imagesLoaded % PAGE_SIZE == 0) {
+                        cursor.close();
+
+                        /* Convert HashMap to ArrayList if not null */
+                        List<Folder> folders = null;
+                        if (folderMap != null) {
+                            folders = new ArrayList<>(folderMap.values());
+                        }
+
+                        listener.onImagePageLoaded(temp, folders, page);
+                        return;
+                    }
                 } while (cursor.moveToPrevious());
             }
             cursor.close();
@@ -183,7 +226,7 @@ public class DefaultImageFileLoader implements ImageFileLoader {
                 folders = new ArrayList<>(folderMap.values());
             }
 
-            listener.onImageLoaded(temp, folders);
+            listener.onImagePageLoaded(temp, folders, page);
         }
     }
 
