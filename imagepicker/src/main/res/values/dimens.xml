@@ -1,5 +1,5 @@
 <resources>
-    <dimen name="ef_item_padding">1dp</dimen>
+    <dimen name="ef_item_padding">0.5dp</dimen>
 
     <dimen name="ef_padding_small">5dp</dimen>
     <dimen name="ef_padding_medium">10dp</dimen>
