@@ -114,9 +114,7 @@ public class RecyclerViewManager {
             recyclerView.removeItemDecoration(itemOffsetDecoration);
         }
         itemOffsetDecoration = new GridSpacingItemDecoration(
-                columns,
-                context.getResources().getDimensionPixelSize(R.dimen.ef_item_padding),
-                false
+                context.getResources().getDimensionPixelSize(R.dimen.ef_item_padding)
         );
         recyclerView.addItemDecoration(itemOffsetDecoration);
 
