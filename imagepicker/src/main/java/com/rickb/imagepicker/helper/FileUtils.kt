@@ -44,10 +44,18 @@ private fun applyQualityToBitmap(photoMemoQuality: ImageQuality, originalBitmap:
 
     return if (currentWidth > currentHeight) {
         val desiredWidth = photoMemoQuality.desiredWidth
-        Bitmap.createScaledBitmap(originalBitmap, desiredWidth, calculateHeight(desiredWidth, currentWidth, currentHeight), true)
+        if (desiredWidth < currentWidth) {
+            Bitmap.createScaledBitmap(originalBitmap, desiredWidth, calculateHeight(desiredWidth, currentWidth, currentHeight), true)
+        } else {
+            Bitmap.createBitmap(originalBitmap)
+        }
     } else {
         val desiredHeight = photoMemoQuality.desiredHeight
-        Bitmap.createScaledBitmap(originalBitmap, calculateWidth(desiredHeight, currentWidth, currentHeight), desiredHeight, true)
+        if (desiredHeight < currentHeight) {
+            Bitmap.createScaledBitmap(originalBitmap, calculateWidth(desiredHeight, currentWidth, currentHeight), desiredHeight, true)
+        } else {
+            Bitmap.createBitmap(originalBitmap)
+        }
     }
 }
 
