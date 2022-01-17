@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/blue" />
+        </shape>
+    </item>
+    <item
+        android:bottom="@dimen/ef_padding_small"
+        android:left="@dimen/ef_padding_small"
+        android:right="@dimen/ef_padding_small"
+        android:top="@dimen/ef_padding_small"
+        android:drawable="@drawable/ic_picture_memo_active" />
+</layer-list>
