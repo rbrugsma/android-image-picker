@@ -20,4 +20,6 @@
     <dimen name="ef_toolbar_elevation">6dp</dimen>
 
     <dimen name="ef_corner_rounding_default">9dp</dimen>
+
+    <dimen name="ef_icon_camera_padding">38dp</dimen>
 </resources>
