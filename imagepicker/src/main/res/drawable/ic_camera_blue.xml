@@ -6,9 +6,9 @@
         </shape>
     </item>
     <item
-        android:bottom="@dimen/ef_padding_small"
-        android:left="@dimen/ef_padding_small"
-        android:right="@dimen/ef_padding_small"
-        android:top="@dimen/ef_padding_small"
+        android:bottom="@dimen/ef_icon_camera_padding"
+        android:left="@dimen/ef_icon_camera_padding"
+        android:right="@dimen/ef_icon_camera_padding"
+        android:top="@dimen/ef_icon_camera_padding"
         android:drawable="@drawable/ic_picture_memo_active" />
 </layer-list>
